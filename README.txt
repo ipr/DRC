@@ -17,11 +17,14 @@ Ilkka Prusi, ilkka.prusi@gmail.com (2011)
 
 Advantages:
 - each node in network can be both server and client or just either
+-> flexibility, able to use from behind NAT/firewalls 
 - anonymous users: each node has only hash-string transmitted for each node
-- each node can relay to all other (connected) nodes in network
 -> cannot identify user
 -> no collisions of names
+- each node can relay to all other (connected) nodes in network
 -> the more nodes you know, more reliability 
+- zero-configuration
+-> quick&easy to setup
 
 Bugs/limitations:
 - message size&hashing is missing -> may cause infinite retransmissions
