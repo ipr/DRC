@@ -3,7 +3,7 @@
 #include <QAbstractSocket>
 //#include <QTcpSocket>
 //#include <QTcpServer>
-#include <QSslSocket>
+//#include <QSslSocket>
 
 #include "dsockets.h"
 #include "dabstracthash.h"
@@ -11,8 +11,8 @@
 dCommunication::dCommunication(QObject *parent) :
     QObject(parent),
 	m_Connections(),
-	m_Listeners()
-	//m_pListener(nullptr)
+	m_Listeners(),
+	m_MsgHashes()
 {
 }
 
@@ -21,14 +21,12 @@ dCommunication::~dCommunication()
 	auto itl = m_Listeners.begin();
 	while (itl != m_Listeners.end())
 	{
-		QTcpServer *pServer = (*itl);
+		QTcpServer *pServer = itl.value();
 		pServer->close();
 		delete pServer;
 		++itl;
 	}
 	m_Listeners.clear();
-	
-	//m_pListener->close();
 	
 	auto itp = m_Connections.begin();
 	while (itp != m_Connections.end())
@@ -39,30 +37,25 @@ dCommunication::~dCommunication()
 		++itp;
 	}
 	m_Connections.clear();
-	
-	//delete m_pListener;
 }
 
 void dCommunication::initServer(QList<long> lstPortList)
 {
-	/*
-	if (m_pListener == nullptr)
-	{
-		// create listener..
-		m_pListener = new QTcpServer(this);
-	}
-	*/
-	
 	foreach (long lPort, lstPortList)
 	{
-		// any address, any port? list?
-		dServerSocket *pServer = new dServerSocket(this);
-		pServer->listen(QHostAddress::Any, lPort);
-		
-		// connect signal to accept connections..
-		connect(pServer, SIGNAL(newPeerConnection(QTcpServer*)), this, SLOT(onAcceptPeer(QTcpServer*)));
-		
-		m_Listeners.push_back(pServer);
+		// only listener for port if doesn't exist yet
+		QTcpServer *pExisting = m_Listeners.value(lPort, nullptr);
+		if (pExisting == nullptr)
+		{
+			// any address, any port? list?
+			dServerSocket *pServer = new dServerSocket(this);
+			pServer->listen(QHostAddress::Any, lPort);
+			
+			// connect signal to accept connections..
+			connect(pServer, SIGNAL(newPeerConnection(QTcpServer*)), this, SLOT(onAcceptPeer(QTcpServer*)));
+			
+			m_Listeners.insert(lPort, pServer);
+		}
 	}
 }
 
@@ -75,18 +68,7 @@ void dCommunication::onAcceptPeer(QTcpServer *pServer)
 	// send current messages?
 	// send other nodes?
 	m_Connections.push_back(pPeer);
-	
-	//pServer->incomingConnection();
-	//onAcceptPeer();
 }
-
-/*
-void dCommunication::onConnectPeer(QAbstractSocket *pPeer)
-{
-	// send current messages?
-	// send other nodes?
-}
-*/
 
 void dCommunication::addPeer(QString szPeer, long lPort)
 {
@@ -102,10 +84,12 @@ void dCommunication::addPeer(QString szPeer, long lPort)
 	m_Connections.push_back(pPeer);
 }
 
+/*
 void dCommunication::addSecurePeer(QString szPeer, long lPort)
 {
 	// create ssl connection
 }
+*/
 
 void dCommunication::dataReady(QAbstractSocket *pSocket)
 {
@@ -115,12 +99,21 @@ void dCommunication::dataReady(QAbstractSocket *pSocket)
 
 	dSha1Hash sha1hash;
 	
+	// TODO: message size in protocol so we know to concatenate packets until ready..
+	// 
 	// receive
 	QByteArray data = pSocket->readAll();
 	QByteArray hash = sha1hash.getHashed(data);
 	
 	// TODO: check hash if this was transmitted already
 	// to reduce infinite retransmissions..
+	if (m_MsgHashes.contains(hash))
+	{
+		// already sent
+		return;
+	}
+	// otherwise add hash
+	m_MsgHashes.insert(hash);
 	
 	// relay to all other peers
 	auto it = m_Connections.begin();

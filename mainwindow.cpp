@@ -17,12 +17,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
 	m_idThis(),
 	m_pComm(nullptr),
-	m_pModel(nullptr),
+	//m_pModel(nullptr),
 	m_pHashing(nullptr)
 	//m_pSigning(nullptr)
 {
     ui->setupUi(this);
-	m_pModel = new QStandardItemModel(this);
+	//m_pModel = new QStandardItemModel(this);
 	
 	// use sha1 by default
 	m_pHashing = new dSha1Hash(this);

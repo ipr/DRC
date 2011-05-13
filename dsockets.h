@@ -44,6 +44,11 @@ private slots:
 	}
 };
 
+/* // TODO: secure sockets
+class dSecureSocket : public dPeerSocket, public QSSLSocket
+{
+};
+*/
 
 class dServerSocket : public QTcpServer
 {

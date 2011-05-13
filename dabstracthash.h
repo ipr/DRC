@@ -17,11 +17,12 @@ public:
 	
 	// get hash of given string
 	//
-	virtual QByteArray getHashed(const QByteArray &szData) = 0;
+	virtual QByteArray getHashed(const QByteArray &Data) = 0;
 };
 
 // dummy hashing: just plaintext
 //
+/*
 class dDummyHash : public dAbstractHash
 {
 public:
@@ -31,11 +32,13 @@ public:
 	virtual ~dDummyHash(void)
 	{}
 	
-	virtual QByteArray getHashed(const QByteArray &szData)
+	virtual QByteArray getHashed(const QByteArray &Data)
 	{
+		// dummy: just return plaintext
 		return szData;
 	}
 };
+*/
 
 class dSha1Hash : public dAbstractHash, protected QCryptographicHash
 {
@@ -47,10 +50,15 @@ public:
 	virtual ~dSha1Hash(void)
 	{}
 	
-	virtual QByteArray getHashed(const QByteArray &szData)
+	virtual QByteArray getHashed(const QByteArray &Data)
 	{
+		/*
+		reset(); // if reused
 		addData(szData);
 		return result();
+		*/
+		
+		return QCryptographicHash::hash(Data, QCryptographicHash::Sha1);
 	}
 };
 

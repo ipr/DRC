@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QMap>
+#include <QSet>
 #include <QByteArray>
 
 class QAbstractSocket;
@@ -24,10 +25,10 @@ public slots:
 	void initServer(QList<long> lstPortList);
 	void onAcceptPeer(QTcpServer *pServer);
 	
-	//void onConnectPeer(QAbstractSocket *pPeer);
-	
 	void addPeer(QString szPeer, long lPort);
+	/*
 	void addSecurePeer(QString szPeer, long lPort);
+	*/
 	
 	void dataReady(QAbstractSocket *pSocket);
 	
@@ -38,9 +39,11 @@ private:
 	
 	// TODO: can one instance listen more ports?
 	//QTcpServer *m_pListener;
-	QList<QTcpServer*> m_Listeners;
+	//QList<QTcpServer*> m_Listeners;
 	// TODO: map by port
-	//QMap<long, QTcpServer*> m_Listeners;
+	QMap<long, QTcpServer*> m_Listeners;
+	
+	QSet<QByteArray> m_MsgHashes;
 	
 	// receiving buffer until complete?
 	QByteArray m_MessageBuffer;

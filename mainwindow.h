@@ -31,7 +31,7 @@ private:
 	dCommunication *m_pComm;
 	
 	// TODO: view-model for message display
-	QAbstractItemModel *m_pModel;
+	//QAbstractItemModel *m_pModel;
 	
 	dAbstractHash *m_pHashing; // id hashing
 	//dAbstractSign *m_pSigning; // message signing
